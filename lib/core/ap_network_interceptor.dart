@@ -18,7 +18,9 @@ abstract class APNetworkInterceptor {
   /// Dio初始化设置回调
   ///
   /// 业务层可以在这里追加设置dio的参数
-  void setupDio(Dio dio);
+  /// @param dio dio对象
+  /// @param isYapi true-表明是yapi专用dio false-表明是正常网络业务的dio
+  void setupDio(Dio dio, bool isYapi);
 
   /// ----------------- 请求生命周期 -------------------
   

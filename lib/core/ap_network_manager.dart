@@ -111,7 +111,7 @@ class APNetworkManager {
       info.dio = _mockDio;
     }
     // 传递给业务层，看看它是否还要设置一些什么
-    business.interceptor.setupDio(info.dio);
+    business.interceptor.setupDio(info.dio, false);
 
     // Debug模式下，才会生成yapiDio
     assert(() {
@@ -123,7 +123,7 @@ class APNetworkManager {
             sendTimeout: business.sendTimeoutMS,
             receiveTimeout: business.recvTimeoutMS,
           ));
-          business.interceptor.setupDio(info.yapiDio);
+          business.interceptor.setupDio(info.yapiDio, true);
         } else {
           info.yapiDio = _mockDio;
         }
