@@ -123,6 +123,7 @@ class APNetworkManager {
             sendTimeout: business.sendTimeoutMS,
             receiveTimeout: business.recvTimeoutMS,
           ));
+          business.interceptor.setupDio(info.yapiDio);
         } else {
           info.yapiDio = _mockDio;
         }
