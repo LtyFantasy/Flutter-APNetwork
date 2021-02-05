@@ -223,13 +223,12 @@ class APNetworkManager {
         _businessInfoMap[request.businessIdentifier];
 
     // 找不到业务线，直接报错返回
-    // 这个仅仅只是作为开发期间的业务警示，理论上不会影响任何业务
-    // 确保测试环境下，所有接口一定关联了存在的业务线
+    // Assert 确保Debug环境下，能强提醒开发者
     if (business == null || businessInfo == null) {
       assert(false, 'Network Error (-1)');
       request.responseComplete(APHttpResponse(
         error: APHttpError(
-        code: -999999,
+        code: -1,
         message: 'Network Error (-1)',
       )));
       return;
