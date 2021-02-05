@@ -26,6 +26,9 @@ import 'ap_network_promise.dart';
 class APNetworkManager {
   /// [Test]单元测试专用
   static Dio _mockDio;
+  
+  /// 初始化报错提示
+  static Function(String error) _initErrorCallback;
 
   /// 初始化完成标记
   Completer<void> _initOk;
@@ -60,6 +63,10 @@ class APNetworkManager {
 
   static void release() {
     _instance = null;
+  }
+  
+  static void setInitErrorCallback(Function(String error) func) {
+    _initErrorCallback = func;
   }
 
   /// ----------------- 设置 --------------------
@@ -223,14 +230,20 @@ class APNetworkManager {
         _businessInfoMap[request.businessIdentifier];
 
     // 找不到业务线，直接报错返回
-    // Assert 确保Debug环境下，能强提醒开发者
     if (business == null || businessInfo == null) {
-      assert(false, 'Network Error (-1)');
+      
       request.responseComplete(APHttpResponse(
         error: APHttpError(
         code: -1,
-        message: 'Network Error (-1)',
+        message: 'Internal Error (-1)',
       )));
+      
+      if (_initErrorCallback != null) {
+        String error = 'Request ${request?.apiPath}, Business ${request?.businessIdentifier} not found,';
+        error += 'current business ${_businessMap?.keys}, info ${_businessInfoMap?.keys}';
+        _initErrorCallback(error);
+      }
+      
       return;
     }
 
