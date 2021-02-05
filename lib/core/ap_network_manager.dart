@@ -77,8 +77,13 @@ class APNetworkManager {
   /// 数据初始化
   Future<void> _setupData() async {
     // 加载Cache本地缓存
-    await _cache.initSetup();
-    await _promise.initSetup();
+    try {
+      await _cache.initSetup();
+      await _promise.initSetup();
+    }
+    catch (e, s) {
+      debugPrint('[APNetwork] setup failed, $e');
+    }
     _initOk.complete();
   }
 
@@ -221,13 +226,11 @@ class APNetworkManager {
     // 这个仅仅只是作为开发期间的业务警示，理论上不会影响任何业务
     // 确保测试环境下，所有接口一定关联了存在的业务线
     if (business == null || businessInfo == null) {
-      assert(false,
-          'Please confirm business(${request.businessIdentifier}) is fucking exsits');
+      assert(false, 'Network Error (-1)');
       request.responseComplete(APHttpResponse(
-          error: APHttpError(
+        error: APHttpError(
         code: -999999,
-        message:
-            'Please confirm business(${request.businessIdentifier}) is fucking exsits',
+        message: 'Network Error (-1)',
       )));
       return;
     }
