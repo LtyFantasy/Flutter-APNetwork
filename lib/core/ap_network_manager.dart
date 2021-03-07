@@ -46,15 +46,26 @@ class APNetworkManager {
   APNetworkPromise _promise;
 
   /// 单例模式
-  factory APNetworkManager({Dio mockDio}) {
-    _mockDio = mockDio;
+  factory APNetworkManager({APNetworkManager mockManager, Dio mockDio}) {
+    
+    assert((){
+      _mockDio = _mockDio;
+      _getInstance(mockManager: mockManager);
+      return true;
+    }());
     return _getInstance();
   }
 
   static APNetworkManager get instance => _getInstance();
   static APNetworkManager _instance;
 
-  static APNetworkManager _getInstance() {
+  static APNetworkManager _getInstance({APNetworkManager mockManager}) {
+    
+    assert((){
+      _instance = mockManager;
+      return true;
+    }());
+    
     if (_instance == null) {
       _instance = APNetworkManager._init();
     }
