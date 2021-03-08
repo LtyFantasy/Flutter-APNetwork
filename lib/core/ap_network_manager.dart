@@ -46,11 +46,16 @@ class APNetworkManager {
   APNetworkPromise _promise;
 
   /// 单例模式
+  ///
+  /// [mockManager] mock APNetworkManager本体
+  /// [mockDio] mock Dio插件
+  ///
+  /// Mock功能仅对Debug模式起作用
   factory APNetworkManager({APNetworkManager mockManager, Dio mockDio}) {
     
     assert((){
       _mockDio = _mockDio;
-      _getInstance(mockManager: mockManager);
+      _instance = mockManager;
       return true;
     }());
     return _getInstance();
@@ -59,13 +64,7 @@ class APNetworkManager {
   static APNetworkManager get instance => _getInstance();
   static APNetworkManager _instance;
 
-  static APNetworkManager _getInstance({APNetworkManager mockManager}) {
-    
-    assert((){
-      _instance = mockManager;
-      return true;
-    }());
-    
+  static APNetworkManager _getInstance() {
     if (_instance == null) {
       _instance = APNetworkManager._init();
     }
