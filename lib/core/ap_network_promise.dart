@@ -12,27 +12,27 @@ import 'package:path/path.dart';
 /// 注意，该对象业务层不需要关心
 class APNetworkPromise {
   
-  APNetworkPromiseDB _db;
+  late APNetworkPromiseDB _db;
   
   /// 业务线Promise队列映射
-  Map<String, List<APHttpRequest>> _businessMap;
+  late Map<String?, List<APHttpRequest>> _businessMap;
   
   /// 单例
-  factory APNetworkPromise({APNetworkPromiseDB mockDB}) {
-    return _getInstance(mockDB: mockDB);
+  factory APNetworkPromise({APNetworkPromiseDB? mockDB}) {
+    return _getInstance(mockDB: mockDB)!;
   }
   
-  static APNetworkPromise get instance => _getInstance();
-  static APNetworkPromise _instance;
+  static APNetworkPromise? get instance => _getInstance();
+  static APNetworkPromise? _instance;
   
-  static APNetworkPromise _getInstance({APNetworkPromiseDB mockDB}) {
+  static APNetworkPromise? _getInstance({APNetworkPromiseDB? mockDB}) {
     if (_instance == null) {
       _instance = APNetworkPromise._init(mockDB: mockDB);
     }
     return _instance;
   }
 
-  APNetworkPromise._init({APNetworkPromiseDB mockDB}) {
+  APNetworkPromise._init({APNetworkPromiseDB? mockDB}) {
     _db = mockDB ?? APNetworkPromiseDB();
     _businessMap = Map();
   }
@@ -48,9 +48,9 @@ class APNetworkPromise {
     // 按照业务线分类，加载到Map中
     for (APHttpRequest request in requestList) {
       
-      List<APHttpRequest> list = _businessMap[request.businessIdentifier];
+      List<APHttpRequest>? list = _businessMap[request.businessIdentifier];
       if (list == null) {
-        list = List();
+        list = List.empty(growable: true);
         _businessMap[request.businessIdentifier] = list;
       }
       list.add(request);
@@ -64,9 +64,9 @@ class APNetworkPromise {
   /// 队列和Business挂钩
   Future<void> saveRequest(APHttpRequest request) async {
     
-    List<APHttpRequest> list = _businessMap[request.businessIdentifier];
+    List<APHttpRequest>? list = _businessMap[request.businessIdentifier];
     if (list == null) {
-      list = List();
+      list = List.empty(growable: true);
       _businessMap[request.businessIdentifier] = list;
     }
     
@@ -78,14 +78,14 @@ class APNetworkPromise {
   ///
   /// @param: businessIdentifier 业务线识别码
   /// @param: paths 请求的path数组，用来判定具体是什么请求
-  List<APHttpRequest> loadBusinessRequests(String businessIdentifier, {List<String> paths}) {
+  List<APHttpRequest>? loadBusinessRequests(String businessIdentifier, {List<String>? paths}) {
     
     if (businessIdentifier == null) return null;
-    List<APHttpRequest> list = _businessMap[businessIdentifier];
+    List<APHttpRequest>? list = _businessMap[businessIdentifier];
     if (paths == null || paths.length == 0) return list;
     if (list == null) return null;
 
-    List<APHttpRequest> result = List();
+    List<APHttpRequest> result = List.empty(growable: true);
     // Path对得上的，放入list
     for (APHttpRequest request in list) {
       if (paths.contains(request.apiPath)) {
@@ -97,10 +97,10 @@ class APNetworkPromise {
   }
   
   /// 删除指定的请求
-  Future<void> deleteRequestWithKey(String businessIdentifier, String promiseKey) async {
+  Future<void> deleteRequestWithKey(String? businessIdentifier, String? promiseKey) async {
     
     if (businessIdentifier == null) return;
-    List<APHttpRequest> list = _businessMap[businessIdentifier];
+    List<APHttpRequest> list = _businessMap[businessIdentifier]!;
     list.removeWhere((request) => request.promise.key == promiseKey);
     await _db.delete(promiseKey);
   }
@@ -137,7 +137,7 @@ class APNetworkPromiseDB {
       [ColumnId, ColumnBusiness, ColumnPath, ColumnData];
   
   /// 数据库对象
-  Database db;
+  late Database db;
   
   /// 初始化设置
   Future<void> initSetup() async {
@@ -189,7 +189,7 @@ class APNetworkPromiseDB {
   }
 
   /// 删 - 单个
-  Future<void> delete(String key) async {
+  Future<void> delete(String? key) async {
     try {
       await db.delete(Table, where: '$ColumnId = ?', whereArgs: [key]);
     }
@@ -214,7 +214,7 @@ class APNetworkPromiseDB {
       
         List<APHttpRequest> list = [];
         for (Map map in maps) {
-          APHttpRequest request = APHttpRequest.fromMap(json.decode(map[ColumnData]));
+          APHttpRequest? request = APHttpRequest.fromMap(json.decode(map[ColumnData]));
           if (request != null) {
             list.add(request);
           }

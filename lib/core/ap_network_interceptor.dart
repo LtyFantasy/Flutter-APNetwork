@@ -20,7 +20,7 @@ abstract class APNetworkInterceptor {
   /// 业务层可以在这里追加设置dio的参数
   /// @param dio dio对象
   /// @param isYapi true-表明是yapi专用dio false-表明是正常网络业务的dio
-  void setupDio(Dio dio, bool isYapi);
+  void setupDio(Dio? dio, bool isYapi);
 
   /// ----------------- 请求生命周期 -------------------
   
@@ -53,7 +53,7 @@ abstract class APNetworkInterceptor {
   bool needRetry(APHttpRequest request, APHttpResponse response);
 
   /// 请求保存了缓存数据
-  void onSaveCache(APHttpRequest request, Map<String, dynamic> cacheData);
+  void onSaveCache(APHttpRequest request, Map<String, dynamic>? cacheData);
   
   /// 请求从Promise中移除
   void onRemoveFromPromise(APHttpRequest request);

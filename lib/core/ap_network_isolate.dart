@@ -6,16 +6,16 @@ import 'dart:isolate';
 class APNetworkIsolate {
   
   /// 子Isolate对象
-  Isolate _isolate;
+  Isolate? _isolate;
   
   /// 主Isolate接收端口
-  ReceivePort _receivePort;
+  ReceivePort? _receivePort;
   
   /// 主Isolate发送端口
-  SendPort _sendPort;
+  SendPort? _sendPort;
   
   /// 待处理消息队列
-  Map<int, APNetworkIsolateMesssage> _messageMap;
+  late Map<int?, APNetworkIsolateMesssage> _messageMap;
   
   /// ---------------- 初始化，数据设置 ------------------
   
@@ -29,12 +29,12 @@ class APNetworkIsolate {
     // 把主进程的传输通道[receivePort.sendPort]丢给子线程
     _isolate = await Isolate.spawn(
         _SubIsolate.main,
-        _receivePort.sendPort,
+        _receivePort!.sendPort,
         debugName: 'APNetworkIsolate'
     );
     
     Completer completer = Completer();
-    _receivePort.listen((data) {
+    _receivePort!.listen((data) {
       
       if (data is SendPort) {
         _sendPort = data;
@@ -49,12 +49,12 @@ class APNetworkIsolate {
   
   void close() {
     
-    _sendPort.send(APNetworkIsolateMesssage(
+    _sendPort!.send(APNetworkIsolateMesssage(
       type: APNetworkIsolateMesssageType.Closed
     ).toMap());
     
-    _receivePort.close();
-    _isolate.kill(priority: Isolate.immediate);
+    _receivePort!.close();
+    _isolate!.kill(priority: Isolate.immediate);
     _isolate = null;
     _receivePort = null;
     _sendPort = null;
@@ -63,7 +63,7 @@ class APNetworkIsolate {
   /// ---------------- 消息操作 ------------------
 
   /// 发送事件消息
-  APNetworkIsolateMesssage sendMessage(APNetworkIsolateMesssage messsage) {
+  APNetworkIsolateMesssage? sendMessage(APNetworkIsolateMesssage messsage) {
     
     if (messsage == null || messsage is! APNetworkIsolateMesssage) {
       return null;
@@ -84,12 +84,12 @@ class APNetworkIsolate {
     /// Json解析任务 特殊处理
     /// 把原始String当成一个参数分开传，避免被encode decode浪费时间
     if (messsage.type == APNetworkIsolateMesssageType.ParseJson) {
-      String jsonString = messsage.data;
+      String? jsonString = messsage.data;
       messsage.data = null;
-      _sendPort.send([messsage.toMap(), jsonString]);
+      _sendPort!.send([messsage.toMap(), jsonString]);
     }
     else {
-      _sendPort.send([messsage.toMap()]);
+      _sendPort!.send([messsage.toMap()]);
     }
   }
 
@@ -103,7 +103,7 @@ class APNetworkIsolate {
     }
 
     // 给对应的发送方消息设置response
-    APNetworkIsolateMesssage sendMessage = _messageMap[messsage._eventId];
+    APNetworkIsolateMesssage? sendMessage = _messageMap[messsage._eventId];
     if (sendMessage != null) {
       sendMessage.responseComplete(messsage);
     }
@@ -132,10 +132,10 @@ class APNetworkIsolateMesssage {
   /// 消息事件唯一码
   ///
   /// 表征Send、Receive是否是应对同一个事件
-  int _eventId;
+  int? _eventId;
 
   /// 消息类型
-  final APNetworkIsolateMesssageType type;
+  final APNetworkIsolateMesssageType? type;
   
   /// 数据
   dynamic data;
@@ -158,7 +158,7 @@ class APNetworkIsolateMesssage {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map();
     map['eventId'] = _eventId;
-    map['type'] = type.index;
+    map['type'] = type!.index;
     map['data'] = json.encode(data);
     return map;
   }
@@ -209,7 +209,7 @@ class _SubIsolate {
   /// Json解析方法
   static void parseJson(SendPort sendPort, APNetworkIsolateMesssage messsage, String jsonString) {
   
-    Map<String, dynamic> map = json.decode(jsonString);
+    Map<String, dynamic>? map = json.decode(jsonString);
     APNetworkIsolateMesssage sendMsg = APNetworkIsolateMesssage(
         type: APNetworkIsolateMesssageType.ParseJson,
     );

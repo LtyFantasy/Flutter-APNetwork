@@ -2,19 +2,19 @@
 import 'ap_http_error.dart';
 import 'ap_http_model.dart';
 
-class APHttpResponse<T extends APHttpModel> {
+class APHttpResponse<T extends APHttpModel?> {
   
   /// 服务端返回的Header数据
-  final Map<String, List<String>> headers;
+  final Map<String, List<String>>? headers;
   
   /// 服务端返回的body数据
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   
   /// 业务层Model，在[Parser]，中由[APHttpRequest]的[ModelConverter]生成
-  final T model;
+  final T? model;
   
   /// 业务层解析器生成的Erro
-  final APHttpError error;
+  final APHttpError? error;
   
   /// 请求是否成功
   bool get isSuccess => error == null;

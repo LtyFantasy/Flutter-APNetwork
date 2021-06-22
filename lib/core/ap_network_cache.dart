@@ -17,14 +17,14 @@ import 'package:path/path.dart';
 class APNetworkCache {
   
   /// 单例
-  factory APNetworkCache({int lruCacheSize = 100, APNetworkCacheDB mockDB}) {
-    return _getInstance(lruCacheSize: lruCacheSize, mockDB: mockDB);
+  factory APNetworkCache({int lruCacheSize = 100, APNetworkCacheDB? mockDB}) {
+    return _getInstance(lruCacheSize: lruCacheSize, mockDB: mockDB)!;
   }
   
-  static APNetworkCache get instance => _getInstance(lruCacheSize: 100);
-  static APNetworkCache _instance;
+  static APNetworkCache? get instance => _getInstance(lruCacheSize: 100);
+  static APNetworkCache? _instance;
   
-  static APNetworkCache _getInstance({int lruCacheSize, APNetworkCacheDB mockDB}) {
+  static APNetworkCache? _getInstance({int? lruCacheSize, APNetworkCacheDB? mockDB}) {
     if (_instance == null) {
       _instance = APNetworkCache._init(lruCacheSize: lruCacheSize, mockDB: mockDB);
     }
@@ -36,23 +36,23 @@ class APNetworkCache {
   }
   
   /// 初始化完成标记
-  bool _initOk;
+  bool? _initOk;
   
   /// 持久化缓存管理
-  APNetworkCacheDB _db;
+  late APNetworkCacheDB _db;
   
   /// LRU缓存
-  _LRUCache<String, _CacheData> _lruCache;
+  late _LRUCache<String?, _CacheData> _lruCache;
   
   /// 独立缓存
-  Map<String, _CacheData> _normalCache;
+  late Map<String?, _CacheData> _normalCache;
 
   /// ------------------- 初始化 ---------------------
   
-  APNetworkCache._init({int lruCacheSize, APNetworkCacheDB mockDB}) {
+  APNetworkCache._init({int? lruCacheSize, APNetworkCacheDB? mockDB}) {
     _initOk = false;
-    _lruCache = _LRUCache<String, _CacheData>(cacheSize: lruCacheSize);
-    _normalCache = Map<String, _CacheData>();
+    _lruCache = _LRUCache<String?, _CacheData>(cacheSize: lruCacheSize);
+    _normalCache = Map<String?, _CacheData>();
     _db = mockDB ?? APNetworkCacheDB();
   }
   
@@ -67,7 +67,7 @@ class APNetworkCache {
     };
 
     // 加载LRU缓存
-    List<_CacheData> lruDatas = await _db.getAll(isLRU: true);
+    List<_CacheData>? lruDatas = await _db.getAll(isLRU: true);
     if (lruDatas != null && lruDatas.length > 0) {
       for (_CacheData data in lruDatas) {
         _lruCache[data.key] = data;
@@ -75,7 +75,7 @@ class APNetworkCache {
     }
     
     // 加载普通缓存
-    List<_CacheData> normalDatas = await _db.getAll(isLRU: false);
+    List<_CacheData>? normalDatas = await _db.getAll(isLRU: false);
     if (normalDatas != null && normalDatas.length > 0) {
       for (_CacheData data in normalDatas) {
         _normalCache[data.key] = data;
@@ -89,9 +89,9 @@ class APNetworkCache {
   ///
   /// 如果缓存达到上限，会移除最不常用的
   Future<void> saveCache(
-      String key,
-      Map<String, dynamic> data,
-      {Duration duration, bool useLRU = true}) async {
+      String? key,
+      Map<String, dynamic>? data,
+      {Duration? duration, bool useLRU = true}) async {
     
     if (key == null || !(key is String)
         || data == null || !(data is Map)) {
@@ -101,7 +101,7 @@ class APNetworkCache {
     if (_initOk == false) return;
     
     // 查看是否有老数据
-    _CacheData oldData;
+    _CacheData? oldData;
     if (useLRU == true) {
       oldData = _lruCache[key];
     }
@@ -134,12 +134,12 @@ class APNetworkCache {
   /// 加载缓存
   ///
   /// 如果缓存有时限，若时限已到，则返回null，并移除
-  Map<String, dynamic> loadCache(String key, {bool useLRU = true}) {
+  Map<String, dynamic>? loadCache(String? key, {bool useLRU = true}) {
   
     if (key == null || !(key is String)) return null;
     if (_initOk == false) return null;
     
-    _CacheData cacheData;
+    _CacheData? cacheData;
     if (useLRU == true) {
       cacheData = _lruCache[key];
     }
@@ -174,24 +174,24 @@ class APNetworkCache {
 class _CacheData {
   
   /// 所属request的md5Key
-  String key;
+  String? key;
   
   /// 缓存数据，来自服务端的原始数据
-  Map<String, dynamic> data;
+  Map<String, dynamic>? data;
   
   /// 是否是LRU缓存
-  bool isLRUCache;
+  bool? isLRUCache;
   
   /// 缓存创建时间
-  DateTime createTime;
+  DateTime? createTime;
   
   /// 缓存持续时间，秒
-  Duration duration;
+  Duration? duration;
   
   /// 缓存是否失效
   bool get isExpire {
     if (duration == null) return false;
-    if (createTime?.add(duration)?.isBefore(DateTime.now()) == true) return true;
+    if (createTime?.add(duration!)?.isBefore(DateTime.now()) == true) return true;
     return false;
   }
   
@@ -219,7 +219,7 @@ class _CacheData {
     map[APNetworkCacheDB.ColumnIsLRU] = isLRUCache == true ? 1 : 0;
     map[APNetworkCacheDB.ColumnCreateTime] = createTime.toString();
     if (duration != null) {
-      map[APNetworkCacheDB.ColumnDuration] = duration.inSeconds;
+      map[APNetworkCacheDB.ColumnDuration] = duration!.inSeconds;
     }
     return map;
   }
@@ -231,21 +231,21 @@ class _LRUCache<K, V> {
   final LinkedHashMap<K, V> _map = new LinkedHashMap<K, V>();
   
   /// 缓存总大小
-  final int cacheSize;
+  final int? cacheSize;
   
   /// 当前缓存大小
   int get currentSize => _map.length;
   
   /// 移除处理通知（达到上限时，移除最不常用的）
-  void Function(V value) evictionHandler;
+  void Function(V value)? evictionHandler;
   
   _LRUCache({this.cacheSize = 100});
   
   /// 取数据
   ///
   /// 保证取了后，该数据重新置顶，更新新鲜度
-  V get(K key) {
-    V value = _map.remove(key);
+  V? get(K key) {
+    V? value = _map.remove(key);
     if (value != null) {
       _map[key] = value;
     }
@@ -260,16 +260,16 @@ class _LRUCache<K, V> {
     _map[key] = value;
     
     // 如果超出上限，移除末尾最不常用的数据
-    if (_map.length > cacheSize) {
-      V removeValue = _map.remove(_map.keys.first);
+    if (_map.length > cacheSize!) {
+      V? removeValue = _map.remove(_map.keys.first);
       if (removeValue != null && evictionHandler != null) {
-        evictionHandler(removeValue);
+        evictionHandler!(removeValue);
       }
     }
   }
   
   /// []下标操作，运算符重载
-  V operator [](K key) {
+  V? operator [](K key) {
     return get(key);
   }
   
@@ -321,7 +321,7 @@ class APNetworkCacheDB {
       [ColumnId, ColumnData, ColumnIsLRU, ColumnCreateTime, ColumnDuration];
   
   /// 数据库对象
-  Database db;
+  late Database db;
   
   /// 初始化设置
   Future<void> initSetup() async {
@@ -365,7 +365,7 @@ class APNetworkCacheDB {
   }
   
   /// 删 - 单个Profile
-  Future<void> delete(String id) async {
+  Future<void> delete(String? id) async {
     try {
       await db.delete(Table, where: '$ColumnId = ?', whereArgs: [id]);
     }
@@ -390,7 +390,7 @@ class APNetworkCacheDB {
   }
   
   /// 查 - 单个Profile
-  Future<_CacheData> get(String id) async {
+  Future<_CacheData?> get(String id) async {
     try {
       List<Map> maps = await db.query(
           Table,
@@ -399,7 +399,7 @@ class APNetworkCacheDB {
           whereArgs: [id]);
       
       if (maps.length > 0) {
-        return _CacheData.fromSQLiteMap(maps.first);
+        return _CacheData.fromSQLiteMap(maps.first as Map<String, dynamic>);
       }
       return null;
     }
@@ -409,7 +409,7 @@ class APNetworkCacheDB {
   }
   
   /// 查 - 所有Profile
-  Future<List<_CacheData>> getAll({bool isLRU}) async {
+  Future<List<_CacheData>?> getAll({bool? isLRU}) async {
     
     if (isLRU == null) return null;
     try {
@@ -424,7 +424,7 @@ class APNetworkCacheDB {
         
         List<_CacheData> list = [];
         for (Map map in maps) {
-          _CacheData cache = _CacheData.fromSQLiteMap(map);
+          _CacheData cache = _CacheData.fromSQLiteMap(map as Map<String, dynamic>);
           if (cache != null) {
             list.add(cache);
           }

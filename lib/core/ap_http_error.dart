@@ -4,13 +4,13 @@
 class APHttpError {
   
   // 错误码
-  final int code;
+  final int? code;
   // 原始错误消息
-  final String originMessage;
+  final String? originMessage;
   // 提供给业务层展示用的错误消息
-  final String message;
+  final String? message;
   // 原始返回数据
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
   // 原始错误对象
   final dynamic originError;
 

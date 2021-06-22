@@ -25,25 +25,25 @@ import 'ap_network_promise.dart';
 /// 维护整个通信流程，接口发起、回应处理、过程监控、请求重试
 class APNetworkManager {
   /// [Test]单元测试专用
-  static Dio _mockDio;
+  static Dio? _mockDio;
   
   /// 初始化报错提示
-  static Function(String error) _initErrorCallback;
+  static Function(String error)? _initErrorCallback;
 
   /// 初始化完成标记
-  Completer<void> _initOk;
+  late Completer<void> _initOk;
 
   /// 业务线
-  Map<String, APNetworkBusiness> _businessMap;
+  late Map<String?, APNetworkBusiness> _businessMap;
 
   /// 业务线其他信息
-  Map<String, _APNetworkBusinessInfo> _businessInfoMap;
+  late Map<String?, _APNetworkBusinessInfo> _businessInfoMap;
 
   /// 请求缓存
-  APNetworkCache _cache;
+  APNetworkCache? _cache;
 
   /// Promise，请求保证机制
-  APNetworkPromise _promise;
+  APNetworkPromise? _promise;
 
   /// 单例模式
   ///
@@ -51,20 +51,20 @@ class APNetworkManager {
   /// [mockDio] mock Dio插件
   ///
   /// Mock功能仅对Debug模式起作用
-  factory APNetworkManager({APNetworkManager mockManager, Dio mockDio}) {
+  factory APNetworkManager({APNetworkManager? mockManager, Dio? mockDio}) {
     
     assert((){
       _mockDio = _mockDio;
       _instance = mockManager;
       return true;
     }());
-    return _getInstance();
+    return _getInstance()!;
   }
 
-  static APNetworkManager get instance => _getInstance();
-  static APNetworkManager _instance;
+  static APNetworkManager? get instance => _getInstance();
+  static APNetworkManager? _instance;
 
-  static APNetworkManager _getInstance() {
+  static APNetworkManager? _getInstance() {
     if (_instance == null) {
       _instance = APNetworkManager._init();
     }
@@ -95,8 +95,8 @@ class APNetworkManager {
   Future<void> _setupData() async {
     // 加载Cache本地缓存
     try {
-      await _cache.initSetup();
-      await _promise.initSetup();
+      await _cache!.initSetup();
+      await _promise!.initSetup();
     }
     catch (e, s) {
       debugPrint('[APNetwork] setup failed, $e');
@@ -124,7 +124,7 @@ class APNetworkManager {
     // 为其创建Dio
     if (_mockDio == null) {
       info.dio = Dio(BaseOptions(
-        baseUrl: business.baseURL,
+        baseUrl: business.baseURL!,
         connectTimeout: business.connectTimeoutMS,
         sendTimeout: business.sendTimeoutMS,
         receiveTimeout: business.recvTimeoutMS,
@@ -140,7 +140,7 @@ class APNetworkManager {
       if (business.yapiBaseURL != null) {
         if (_mockDio == null) {
           info.yapiDio = Dio(BaseOptions(
-            baseUrl: business.yapiBaseURL,
+            baseUrl: business.yapiBaseURL!,
             connectTimeout: business.connectTimeoutMS,
             sendTimeout: business.sendTimeoutMS,
             receiveTimeout: business.recvTimeoutMS,
@@ -154,13 +154,13 @@ class APNetworkManager {
     }());
 
     // 业务线，初始化完成
-    info.initOk.complete();
+    info.initOk!.complete();
   }
 
   /// 清空各缓存数据
   Future<void> cleanData() async {
-    await _cache.cleanCache();
-    await _promise.cleanAll();
+    await _cache!.cleanCache();
+    await _promise!.cleanAll();
     for (APNetworkBusiness business in _businessMap.values) {
       await business.interceptor.onCleanData();
     }
@@ -171,11 +171,11 @@ class APNetworkManager {
   /// 暂停指定的业务线请求
   ///
   /// 为其设置suspend标记
-  void suspend({List<String> identifiers, bool all = false}) {
+  void suspend({List<String>? identifiers, bool all = false}) {
     
     if (all == true) {
-      for (String id in _businessMap.keys) {
-        _APNetworkBusinessInfo info = _businessInfoMap[id];
+      for (String? id in _businessMap.keys) {
+        _APNetworkBusinessInfo? info = _businessInfoMap[id];
         if (info != null && info.suspend == null) {
           info.suspend = Completer();
         }
@@ -184,7 +184,7 @@ class APNetworkManager {
     else {
       if (identifiers == null) return;
       for (String id in identifiers) {
-        _APNetworkBusinessInfo info = _businessInfoMap[id];
+        _APNetworkBusinessInfo? info = _businessInfoMap[id];
         if (info != null && info.suspend == null) {
           info.suspend = Completer();
         }
@@ -195,13 +195,13 @@ class APNetworkManager {
   /// 恢复指定的业务线请求
   ///
   /// 完成suspend标记，并设置为null
-  void resume({List<String> identifiers, bool all = false}) {
+  void resume({List<String>? identifiers, bool all = false}) {
     if (all == true) {
-      for (String id in _businessMap.keys) {
-        _APNetworkBusinessInfo info = _businessInfoMap[id];
+      for (String? id in _businessMap.keys) {
+        _APNetworkBusinessInfo? info = _businessInfoMap[id];
         if (info != null && info.suspend != null) {
-          if (info.suspend.isCompleted == false) {
-            info.suspend.complete();
+          if (info.suspend!.isCompleted == false) {
+            info.suspend!.complete();
           }
           info.suspend = null;
         }
@@ -210,10 +210,10 @@ class APNetworkManager {
     else {
       if (identifiers == null) return;
       for (String id in identifiers) {
-        _APNetworkBusinessInfo info = _businessInfoMap[id];
+        _APNetworkBusinessInfo? info = _businessInfoMap[id];
         if (info != null && info.suspend != null) {
-          if (info.suspend.isCompleted == false) {
-            info.suspend.complete();
+          if (info.suspend!.isCompleted == false) {
+            info.suspend!.complete();
           }
           info.suspend = null;
         }
@@ -235,8 +235,8 @@ class APNetworkManager {
   Future<void> _sendRequest(APHttpRequest request) async {
     
     if (request == null) return;
-    APNetworkBusiness business = _businessMap[request.businessIdentifier];
-    _APNetworkBusinessInfo businessInfo =
+    APNetworkBusiness? business = _businessMap[request.businessIdentifier];
+    _APNetworkBusinessInfo? businessInfo =
         _businessInfoMap[request.businessIdentifier];
 
     // 找不到业务线，直接报错返回
@@ -251,28 +251,28 @@ class APNetworkManager {
       if (_initErrorCallback != null) {
         String error = 'Request ${request?.apiPath}, Business ${request?.businessIdentifier} not found,';
         error += 'current business ${_businessMap?.keys}, info ${_businessInfoMap?.keys}';
-        _initErrorCallback(error);
+        _initErrorCallback!(error);
       }
       
       return;
     }
 
     // 临时变量，用来catch的时候传递dio返回值，如果有response的话，就可以协助定位问题
-    Response _dioResponse;
+    Response? _dioResponse;
     
     try {
       // 等待业务线初始化完毕
-      if (businessInfo.initOk.isCompleted == false) {
-        await businessInfo.initOk.future;
+      if (businessInfo.initOk!.isCompleted == false) {
+        await businessInfo.initOk!.future;
       }
 
       // 是否有暂停控制
       if (businessInfo.suspend != null &&
-          businessInfo.suspend.isCompleted == false) {
+          businessInfo.suspend!.isCompleted == false) {
         // 咨询业务层，请求是否可以破例通行
         if (business.interceptor.allowRequestPassWhenSuspend(request) ==
             false) {
-          await businessInfo.suspend.future;
+          await businessInfo.suspend!.future;
         }
       }
 
@@ -286,8 +286,8 @@ class APNetworkManager {
       _checkIfNeedLoadCache(business, request);
 
       // 正常情况下
-      Dio dio = businessInfo.dio;
-      String path = request.path;
+      Dio? dio = businessInfo.dio;
+      String? path = request.path;
 
       /// 确保仅仅只有Debug模式下，才会有Mock逻辑
       /// Release模式下，一定不会发起mock请求
@@ -299,7 +299,7 @@ class APNetworkManager {
         return true;
       }());
       
-      Response response = await dio.request(path,
+      Response response = await dio!.request(path!,
           data: request.data,
           queryParameters: request.queryParams,
           cancelToken: request.cancelToken,
@@ -335,7 +335,7 @@ class APNetworkManager {
     if (_needRetry(business, request, response)) {
       request.retry.count++;
       // 重试间隔时间，如果Request没有指定，就用业务线的配置
-      int delayTime = request.retry.retryIntervalMS ?? business.retryIntervalMS;
+      int delayTime = request.retry.retryIntervalMS ?? business.retryIntervalMS!;
       Future.delayed(Duration(milliseconds: delayTime), () {
         sendRequest(request);
       });
@@ -364,7 +364,7 @@ class APNetworkManager {
 
     // 如果允许有限次重试，但是重试次数已经超过
     if (request.retry.type == APHTTPRequestRetryType.Limit &&
-        request.retry.count >= request.retry.max) {
+        request.retry.count >= request.retry.max!) {
       return false;
     }
 
@@ -381,7 +381,7 @@ class APNetworkManager {
     // 开启了缓存功能，且本次request不忽略缓存
     if (request.cache.enable == true && request.cache.ignoreOnce == false) {
       request.generateMD5Key();
-      Map<String, dynamic> cacheData = _cache.loadCache(request.cache.md5Key);
+      Map<String, dynamic>? cacheData = _cache!.loadCache(request.cache.md5Key);
       // 成功读取到缓存，则给request设置cacheResponse
       // 这样业务层发起请求后，立刻就可以判断是否有缓存可以使用
       if (cacheData != null) {
@@ -390,7 +390,7 @@ class APNetworkManager {
             data: cacheData,
             model: request.converter == null
                 ? null
-                : request.converter(cacheData));
+                : request.converter!(cacheData));
       }
     }
   }
@@ -404,7 +404,7 @@ class APNetworkManager {
         response.error == null &&
         response.data != null) {
       business.interceptor.onSaveCache(request, response.data);
-      await _cache.saveCache(request.cache.md5Key, response.data,
+      await _cache!.saveCache(request.cache.md5Key, response.data,
           duration: request.cache.duration);
     }
   }
@@ -417,13 +417,13 @@ class APNetworkManager {
   ///
   /// @param: businessIdentifier 必传，业务线识别码
   /// @param: paths 可选，如果为null，表示获取业务线下所有请求
-  Future<List<APHttpRequest>> getPromiseRequests(String businessIdentifier,
-      {List<String> paths}) async {
+  Future<List<APHttpRequest>?> getPromiseRequests(String businessIdentifier,
+      {List<String>? paths}) async {
     
     if (_initOk.isCompleted == false) {
       await _initOk.future;
     }
-    return _promise.loadBusinessRequests(businessIdentifier, paths: paths);
+    return _promise!.loadBusinessRequests(businessIdentifier, paths: paths);
   }
 
   /// 检查是否需要加入Promise
@@ -433,7 +433,7 @@ class APNetworkManager {
     if (request.promise.key != null) return;
 
     request.generatePromiseKey();
-    _promise.saveRequest(request);
+    _promise!.saveRequest(request);
     // 拦截器监听
     business.interceptor.onAddToPromise(request);
   }
@@ -444,7 +444,7 @@ class APNetworkManager {
     // 正常来说，请求如果返回Success，那么就是完成了Proimse
     // 目前还没有例外的情况，如果有，Promise就需要挪动到业务层去做，而不是在网络框架做
     if (request.promise.enable == true && response.error == null) {
-      await _promise.deleteRequestWithKey(
+      await _promise!.deleteRequestWithKey(
           request.businessIdentifier, request.promise.key);
       business.interceptor.onRemoveFromPromise(request);
     }
@@ -457,19 +457,19 @@ class APNetworkManager {
 /// 仅仅由网络框架自己维护
 class _APNetworkBusinessInfo {
   /// 业务识别码
-  final String identifier;
+  final String? identifier;
 
   /// 初始化完成标记
-  final Completer<void> initOk;
+  final Completer<void>? initOk;
 
   /// 底层请求库
-  Dio dio;
+  Dio? dio;
 
   /// 为Yapi准备的Mock Dio
-  Dio yapiDio;
+  Dio? yapiDio;
 
   /// 暂停标记
-  Completer<void> suspend;
+  Completer<void>? suspend;
 
   _APNetworkBusinessInfo({
     this.identifier,

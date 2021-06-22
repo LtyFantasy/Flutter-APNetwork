@@ -13,5 +13,5 @@ abstract class APHttpParser {
   ///
   /// @param: error，可能是DioError，可能是Exception，也可能是FlutterErrorDetails
   /// @param: stack，异常产生的函数调用栈信息
-  Future<APHttpResponse> handleError(APHttpRequest request, Response dioResponse, dynamic error, StackTrace stack);
+  Future<APHttpResponse> handleError(APHttpRequest request, Response? dioResponse, dynamic error, StackTrace stack);
 }

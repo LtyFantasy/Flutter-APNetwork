@@ -1,7 +1,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 
 import 'package:dio/dio.dart';
@@ -29,23 +28,23 @@ enum _APHttpRequestDataType {
 class APHttpRequest<T extends APHttpModel> {
   
   /// 请求所属业务线
-  final String businessIdentifier;
+  final String? businessIdentifier;
   
   /// 接口请求路径，不包含基地址，eg: /user
-  final String apiPath;
+  final String? apiPath;
   
   /// 请求路径参数，如 /:userId/like
-  final String pathParam;
+  final String? pathParam;
   
   /// 请求的发起URL
   ///
   /// 如果[pathParam]为null，则就是apiPath
   /// 否则，就是两者的组合，eg: /user/:userId/like
-  final String _path;
-  String get path => _path;
+  final String? _path;
+  String? get path => _path;
   
   /// 请求参数 - Query
-  final Map<String, dynamic> queryParams;
+  final Map<String, dynamic>? queryParams;
   
   /// 请求参数 - Data
   ///
@@ -56,10 +55,10 @@ class APHttpRequest<T extends APHttpModel> {
   /// 请求参数的类型
   ///
   /// 有的请求是Map参数，有的是String参数
-  _APHttpRequestDataType _dataType;
+  _APHttpRequestDataType? _dataType;
   
   /// 对应的返回数据模型的转换器
-  ModelConverter<T> converter;
+  ModelConverter<T>? converter;
   
   /// 用于撤销请求，多个请求可以绑定同一个cancelToken实现批量取消
   final CancelToken cancelToken;
@@ -68,10 +67,10 @@ class APHttpRequest<T extends APHttpModel> {
   final Options dioOptions;
 
   /// 发送进度回调
-  ProgressCallback onSendProgress;
+  ProgressCallback? onSendProgress;
 
   /// 接收进度回调
-  ProgressCallback onRecvProgress;
+  ProgressCallback? onRecvProgress;
   
   /// 返回数据Completer
   final Completer<APHttpResponse<T>> _completer = Completer();
@@ -79,12 +78,12 @@ class APHttpRequest<T extends APHttpModel> {
   Future<APHttpResponse<T>> get response => _completer.future;
 
   /// 请求发起起始时间，网络框架发起请求前会自动设置该值
-  DateTime requestStartTime;
+  DateTime? requestStartTime;
   
   /// 额外信息标记值
   ///
   /// 根据业务层需要，自行使用，网络框架本身不会使用该值
-  int extraTag;
+  int? extraTag;
 
   /// ------------------ 请求体 附属功能 -------------------
   
@@ -103,39 +102,39 @@ class APHttpRequest<T extends APHttpModel> {
   /// 不建议使用该构造方法，请使用下面的便捷构造
   APHttpRequest({
     this.businessIdentifier,
-    String method,
+    String? method,
     this.apiPath,
     this.pathParam,
-    String contentType,
-    ResponseType responseType,
-    Map<String, dynamic> headers,
+    String? contentType,
+    ResponseType? responseType,
+    Map<String, dynamic>? headers,
     this.queryParams,
     this.data,
     this.converter,
-    CancelToken cancelToken,
-    Duration sendTimeout,
-    Duration recvTimeout,
+    CancelToken? cancelToken,
+    Duration? sendTimeout,
+    Duration? recvTimeout,
     this.onSendProgress,
     this.onRecvProgress,
     // ----- 重试能力 -----
-    APHTTPRequestRetryType retryType,
-    int maxRetry,
-    int retryIntervalMS,
+    APHTTPRequestRetryType? retryType,
+    int? maxRetry,
+    int? retryIntervalMS,
     // ----- 缓存能力 -----
-    bool cacheEnable,
-    bool cacheUseLRU,
-    bool cacheIgnoreOnce,
-    Duration cacheDuration,
+    bool? cacheEnable,
+    bool? cacheUseLRU,
+    bool? cacheIgnoreOnce,
+    Duration? cacheDuration,
     // ----- Promise能力 -----
-    bool promiseEnable,
+    bool? promiseEnable,
     // ----- Mock能力 -----
-    bool mockEnable,
-    int mockProjectId,
+    bool? mockEnable,
+    int? mockProjectId,
   }) :
     assert(businessIdentifier != null && businessIdentifier.length > 0, '[APHttpRequest] businessIdentifier is empty'),
     assert(method != null && method.length > 0, '[APHttpRequest] method is empty'),
     assert(apiPath != null && apiPath.length > 0, '[APHttpRequest] apiPath is empty'),
-    _path = pathParam == null ? apiPath : apiPath + pathParam,
+    _path = pathParam == null ? apiPath : apiPath! + pathParam,
     cancelToken = cancelToken ?? CancelToken(),
     dioOptions = Options(
       method: method,
@@ -162,7 +161,7 @@ class APHttpRequest<T extends APHttpModel> {
     mock = APHttpRequestMock(
       enable: mockEnable ?? false,
       projectId: mockProjectId ?? 0,
-      originPath: pathParam == null ? apiPath : apiPath + pathParam,
+      originPath: pathParam == null ? apiPath : apiPath! + pathParam,
     ) {
     
     if (data is Map) {
@@ -178,28 +177,28 @@ class APHttpRequest<T extends APHttpModel> {
   
   /// GET请求
   APHttpRequest.get({
-    String businessIdentifier,
-    String apiPath,
-    String pathParam,
-    String contentType,
-    ResponseType responseType,
-    Map<String, dynamic> headers,
-    Map<String, dynamic> params,
-    ModelConverter converter,
-    CancelToken cancelToken,
-    Duration sendTimeout,
-    Duration recvTimeout,
-    ProgressCallback onRecvProgress,
-    APHTTPRequestRetryType retryType,
-    int maxRetry,
-    int retryIntervalMS,
+    String? businessIdentifier,
+    String? apiPath,
+    String? pathParam,
+    String? contentType,
+    ResponseType? responseType,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? params,
+    ModelConverter? converter,
+    CancelToken? cancelToken,
+    Duration? sendTimeout,
+    Duration? recvTimeout,
+    ProgressCallback? onRecvProgress,
+    APHTTPRequestRetryType? retryType,
+    int? maxRetry,
+    int? retryIntervalMS,
     bool cacheEnable = false,
     bool cacheUseLRU = true,
     bool cacheIgnoreOnce = false,
-    Duration cacheDuration,
-    bool promiseEnable,
-    bool mockEnable,
-    int mockProjectId,
+    Duration? cacheDuration,
+    bool? promiseEnable,
+    bool? mockEnable,
+    int? mockProjectId,
   }) : this(
     businessIdentifier: businessIdentifier,
     method : "GET",
@@ -209,7 +208,7 @@ class APHttpRequest<T extends APHttpModel> {
     responseType: responseType,
     headers: headers,
     queryParams: params,
-    converter: converter,
+    converter: converter as T Function(Map<String, dynamic>)?,
     cancelToken: cancelToken,
     sendTimeout: sendTimeout,
     recvTimeout: recvTimeout,
@@ -227,30 +226,30 @@ class APHttpRequest<T extends APHttpModel> {
   );
 
   APHttpRequest.delete({
-    String businessIdentifier,
-    String apiPath,
-    String pathParam,
-    String contentType,
-    ResponseType responseType,
-    Map<String, dynamic> headers,
-    Map<String, dynamic> queryParams,
+    String? businessIdentifier,
+    String? apiPath,
+    String? pathParam,
+    String? contentType,
+    ResponseType? responseType,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? queryParams,
     dynamic data,
-    ModelConverter converter,
-    CancelToken cancelToken,
-    Duration sendTimeout,
-    Duration recvTimeout,
-    ProgressCallback onSendProgress,
-    ProgressCallback onRecvProgress,
-    APHTTPRequestRetryType retryType,
-    int maxRetry,
-    int retryIntervalMS,
+    ModelConverter? converter,
+    CancelToken? cancelToken,
+    Duration? sendTimeout,
+    Duration? recvTimeout,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onRecvProgress,
+    APHTTPRequestRetryType? retryType,
+    int? maxRetry,
+    int? retryIntervalMS,
     bool cacheEnable = false,
     bool cacheUseLRU = true,
     bool cacheIgnoreOnce = false,
-    Duration cacheDuration,
-    bool promiseEnable,
-    bool mockEnable,
-    int mockProjectId,
+    Duration? cacheDuration,
+    bool? promiseEnable,
+    bool? mockEnable,
+    int? mockProjectId,
   }) : this(
     businessIdentifier: businessIdentifier,
     method : "DELETE",
@@ -261,7 +260,7 @@ class APHttpRequest<T extends APHttpModel> {
     headers: headers,
     queryParams: queryParams,
     data: data,
-    converter: converter,
+    converter: converter as T Function(Map<String, dynamic>)?,
     cancelToken: cancelToken,
     sendTimeout: sendTimeout,
     recvTimeout: recvTimeout,
@@ -280,30 +279,30 @@ class APHttpRequest<T extends APHttpModel> {
   );
 
   APHttpRequest.post({
-    String businessIdentifier,
-    String apiPath,
-    String pathParam,
-    String contentType,
-    ResponseType responseType,
-    Map<String, dynamic> headers,
-    Map<String, dynamic> queryParams,
+    String? businessIdentifier,
+    String? apiPath,
+    String? pathParam,
+    String? contentType,
+    ResponseType? responseType,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? queryParams,
     dynamic data,
-    ModelConverter converter,
-    CancelToken cancelToken,
-    Duration sendTimeout,
-    Duration recvTimeout,
-    ProgressCallback onSendProgress,
-    ProgressCallback onRecvProgress,
-    APHTTPRequestRetryType retryType,
-    int maxRetry,
-    int retryIntervalMS,
+    ModelConverter? converter,
+    CancelToken? cancelToken,
+    Duration? sendTimeout,
+    Duration? recvTimeout,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onRecvProgress,
+    APHTTPRequestRetryType? retryType,
+    int? maxRetry,
+    int? retryIntervalMS,
     bool cacheEnable = false,
     bool cacheUseLRU = true,
     bool cacheIgnoreOnce = false,
-    Duration cacheDuration,
-    bool promiseEnable,
-    bool mockEnable,
-    int mockProjectId,
+    Duration? cacheDuration,
+    bool? promiseEnable,
+    bool? mockEnable,
+    int? mockProjectId,
   }) : this(
       businessIdentifier: businessIdentifier,
       method : "POST",
@@ -314,7 +313,7 @@ class APHttpRequest<T extends APHttpModel> {
       headers: headers,
       queryParams: queryParams,
       data: data,
-      converter: converter,
+      converter: converter as T Function(Map<String, dynamic>)?,
       cancelToken: cancelToken,
       sendTimeout: sendTimeout,
       recvTimeout: recvTimeout,
@@ -338,7 +337,7 @@ class APHttpRequest<T extends APHttpModel> {
     APHttpResponse<T> tResponse = APHttpResponse<T>(
       headers: response.headers,
       data: response.data,
-      model: response.model is T ? response.model as T : null,
+      model: response.model is T ? response.model as T? : null,
       error: response.error
     );
     
@@ -355,10 +354,10 @@ class APHttpRequest<T extends APHttpModel> {
   void generateMD5Key() {
     
     String value = '';
-    if (businessIdentifier != null) value += businessIdentifier;
-    if (dioOptions.method != null) value += dioOptions.method;
-    if (apiPath != null) value += apiPath;
-    if (pathParam != null) value += pathParam;
+    if (businessIdentifier != null) value += businessIdentifier!;
+    if (dioOptions.method != null) value += dioOptions.method!;
+    if (apiPath != null) value += apiPath!;
+    if (pathParam != null) value += pathParam!;
     if (queryParams != null) {
       value += json.encode(queryParams);
     }
@@ -370,7 +369,7 @@ class APHttpRequest<T extends APHttpModel> {
     
     List<int> valueData = Utf8Encoder().convert(value);
     Digest digest = md5.convert(valueData);
-    cache._md5Key = hex.encode(digest.bytes);
+    cache._md5Key = digest.toString();
   }
 
   /// ------------------ Promise 操作 -------------------
@@ -385,7 +384,7 @@ class APHttpRequest<T extends APHttpModel> {
   /// ------------------ 归档、解档 -------------------
   
   /// 转换成Map
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic>? toMap() {
     
     try {
   
@@ -399,7 +398,7 @@ class APHttpRequest<T extends APHttpModel> {
       }
   
       // 目前仅支持FormData Map String的Body参数存储
-      map['_dataType'] = _dataType.index;
+      map['_dataType'] = _dataType!.index;
       if (_dataType == _APHttpRequestDataType.Map) {
         map['data'] = json.encode(data);
       }
@@ -411,7 +410,7 @@ class APHttpRequest<T extends APHttpModel> {
       Map<String, dynamic> optionMap = Map();
       optionMap['method'] = dioOptions.method;
       optionMap['contentType'] = dioOptions.contentType;
-      optionMap['responseType'] = dioOptions.responseType.index;
+      optionMap['responseType'] = dioOptions.responseType!.index;
       optionMap['headers'] = json.encode(dioOptions.headers);
       // 单位ms
       if (dioOptions.sendTimeout != null) {
@@ -450,14 +449,14 @@ class APHttpRequest<T extends APHttpModel> {
     }
   }
   
-  static APHttpRequest fromMap(Map<String, dynamic> map) {
+  static APHttpRequest? fromMap(Map<String, dynamic> map) {
     
     try {
-      String businessIdentifier = map['businessIdentifier'];
-      String apiPath = map['apiPath'];
-      String pathParam = map['pathParam'];
+      String? businessIdentifier = map['businessIdentifier'];
+      String? apiPath = map['apiPath'];
+      String? pathParam = map['pathParam'];
   
-      Map<String, dynamic> queryParams;
+      Map<String, dynamic>? queryParams;
       if (map['queryParams'] != null) {
         queryParams = json.decode(map['queryParams']);
       }
@@ -474,22 +473,22 @@ class APHttpRequest<T extends APHttpModel> {
   
       // Option部分，optionMap不可能为null
       Map<String, dynamic> optionMap = json.decode(map['dioOptions']);
-      String method = optionMap['method'];
-      String contentType = optionMap['contentType'];
+      String? method = optionMap['method'];
+      String? contentType = optionMap['contentType'];
       ResponseType responseType = ResponseType.values[optionMap['responseType']];
-      Map<String, dynamic> headers = json.decode(optionMap['headers']);
+      Map<String, dynamic>? headers = json.decode(optionMap['headers']);
       // map中的时间单位，ms
-      Duration sendTimeout;
+      Duration? sendTimeout;
       if (optionMap['sendTimeout'] != null) {
         sendTimeout = Duration(milliseconds: optionMap['sendTimeout']);
       }
   
-      Duration recvTimeout;
+      Duration? recvTimeout;
       if (optionMap['receiveTimeout'] != null) {
         recvTimeout = Duration(milliseconds: optionMap['receiveTimeout']);
       }
       
-      int extraTag = map['extraTag'];
+      int? extraTag = map['extraTag'];
   
       // 重试部分
       APHttpRequestRetry retry = APHttpRequestRetry.fromMap(json.decode(map['retry']));
@@ -577,23 +576,23 @@ enum APHTTPRequestRetryType {
 class APHttpRequestRetry {
   
   /// 重试类型
-  final APHTTPRequestRetryType type;
+  final APHTTPRequestRetryType? type;
   
   /// 最多重试多少次，前提retryType为[APHTTPRequestRetryType.Limit]
-  final int max;
+  final int? max;
 
   /// 当前接口失败重试次数计数
   int count = 0;
   
   /// 重试间隔时间，ms
-  int retryIntervalMS;
+  int? retryIntervalMS;
 
   APHttpRequestRetry({this.type, this.max, this.retryIntervalMS});
 
   Map<String, dynamic> toMap() {
     
     Map<String, dynamic> map = Map();
-    map['type'] = type.index;
+    map['type'] = type!.index;
     map['max'] = max;
     map['retryIntervalMS'] = retryIntervalMS;
     return map;
@@ -611,11 +610,11 @@ class APHttpRequestRetry {
 }
 
 /// 缓存能力
-class APHttpRequestCache<T extends APHttpModel> {
+class APHttpRequestCache<T extends APHttpModel?> {
   
   /// 缓存MD5码，作为Key使用
-  String _md5Key;
-  String get md5Key => _md5Key;
+  String? _md5Key;
+  String? get md5Key => _md5Key;
   
   /// 是否开启缓存
   ///
@@ -623,33 +622,33 @@ class APHttpRequestCache<T extends APHttpModel> {
   ///
   /// 有缓存数据时，若[ignoreOnce]为true，则发起请求后会读取缓存赋值给[response]
   /// 有缓存数据时，若[ignoreOnce]为false，则发起请求后，不会尝试去读缓存数据
-  final bool enable;
+  final bool? enable;
   
   /// 缓存是否走LRU机制
   ///
   /// 默认所有缓存都走LRU机制，但是不排除个别接口需要独立、或长期缓存
-  final bool useLRU;
+  final bool? useLRU;
   
   /// 开启缓存的情况下，如果有cache，本次请求不读cache，但是仍然要存最新cache
   ///
   /// 个别业务场景下，可能会强制本次请求不读缓存
-  final bool ignoreOnce;
+  final bool? ignoreOnce;
   
   /// 缓存时长
   ///
   /// 如果读取缓存时，发现缓存数据的保存时间已经超过，则会放弃该缓存
   /// 为null表示无期限保存
-  final Duration duration;
+  final Duration? duration;
   
   /// 缓存数据，可能为null
-  APHttpResponse<T> _response;
+  late APHttpResponse<T> _response;
   APHttpResponse<T> get response => _response;
   set response (APHttpResponse response) {
   
     APHttpResponse<T> tResponse = APHttpResponse<T>(
         headers: response.headers,
         data: response.data,
-        model: response.model is T ? response.model as T : null,
+        model: response.model is T ? response.model as T? : null,
         error: response.error
     );
     _response = tResponse;
@@ -669,14 +668,14 @@ class APHttpRequestCache<T extends APHttpModel> {
     map['useLRU'] = useLRU;
     map['ignoreOnce'] = ignoreOnce;
     if (duration != null) {
-      map['duration'] = duration.inSeconds;
+      map['duration'] = duration!.inSeconds;
     }
     return map;
   }
 
   static APHttpRequestCache fromMap(Map<String, dynamic> map) {
   
-    Duration duration;
+    Duration? duration;
     if (map['duration'] != null) {
       duration = Duration(seconds: map['duration']);
     }
@@ -699,13 +698,13 @@ class APHttpRequestPromise {
   /// 确保其会一直反复进行请求，直到成功为止，及时用户kill app
   ///
   /// 注意，promise流程期间，业务层可以手动中断该流程
-  final bool enable;
+  final bool? enable;
   
   /// 用于存储时的唯一识别码
   ///
   /// 由APNetworkManager控制生成
-  String _key;
-  String get key => _key;
+  String? _key;
+  String? get key => _key;
 
   APHttpRequestPromise({this.enable});
   
@@ -732,19 +731,19 @@ class APHttpRequestMock {
   /// Mock开关
   ///
   /// True表明该接口会对Yapi发起请求，且请求地址使用Mock地址
-  final bool enable;
+  final bool? enable;
   
   /// 该请求所属Yapi Project Id
-  final int projectId;
+  final int? projectId;
   
   /// 原始请求地址
-  final String originPath;
+  final String? originPath;
   
   /// Mock请求抵制
-  String _path;
-  String get path {
+  String? _path;
+  String? get path {
    if (_path == null) {
-     _path = '/mock/$projectId' + originPath;
+     _path = '/mock/$projectId' + originPath!;
    }
    return _path;
   }

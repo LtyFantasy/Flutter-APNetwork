@@ -13,13 +13,13 @@ import 'ap_network_interceptor.dart';
 class APNetworkBusiness {
   
   /// 唯一识别码
-  final String identifier;
+  final String? identifier;
   
   /// 业务线，请求基地址
-  final String baseURL;
+  final String? baseURL;
   
   /// 业务线，对应的Yapi Mock基地址
-  final String yapiBaseURL;
+  final String? yapiBaseURL;
   
   /// 拦截器
   final APNetworkInterceptor interceptor;
@@ -28,23 +28,23 @@ class APNetworkBusiness {
   final APHttpParser parser;
   
   /// 连接超时时间(ms)
-  final int connectTimeoutMS;
+  final int? connectTimeoutMS;
 
   /// 发送超时时间(ms)
-  final int sendTimeoutMS;
+  final int? sendTimeoutMS;
 
   /// 接收超时时间(ms)
-  final int recvTimeoutMS;
+  final int? recvTimeoutMS;
 
   /// 重试间隔时间(ms)
-  final int retryIntervalMS;
+  final int? retryIntervalMS;
   
   APNetworkBusiness({
     this.identifier,
     this.baseURL,
     this.yapiBaseURL,
-    this.interceptor,
-    this.parser,
+    required this.interceptor,
+    required this.parser,
     this.connectTimeoutMS,
     this.sendTimeoutMS,
     this.recvTimeoutMS,
