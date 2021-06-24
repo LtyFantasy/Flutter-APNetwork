@@ -44,7 +44,7 @@ class APNetworkPromise {
     
     await _db.initSetup();
     List<APHttpRequest> requestList = await _db.getAll();
-    if (requestList == null || requestList.length == 0) return;
+    if (requestList.length == 0) return;
     // 按照业务线分类，加载到Map中
     for (APHttpRequest request in requestList) {
       
@@ -80,7 +80,6 @@ class APNetworkPromise {
   /// @param: paths 请求的path数组，用来判定具体是什么请求
   List<APHttpRequest>? loadBusinessRequests(String businessIdentifier, {List<String>? paths}) {
     
-    if (businessIdentifier == null) return null;
     List<APHttpRequest>? list = _businessMap[businessIdentifier];
     if (paths == null || paths.length == 0) return list;
     if (list == null) return null;

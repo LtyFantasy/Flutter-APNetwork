@@ -191,7 +191,7 @@ class _CacheData {
   /// 缓存是否失效
   bool get isExpire {
     if (duration == null) return false;
-    if (createTime?.add(duration!)?.isBefore(DateTime.now()) == true) return true;
+    if (createTime?.add(duration!).isBefore(DateTime.now()) == true) return true;
     return false;
   }
   
@@ -425,9 +425,7 @@ class APNetworkCacheDB {
         List<_CacheData> list = [];
         for (Map map in maps) {
           _CacheData cache = _CacheData.fromSQLiteMap(map as Map<String, dynamic>);
-          if (cache != null) {
-            list.add(cache);
-          }
+          list.add(cache);
         }
         return list;
       }

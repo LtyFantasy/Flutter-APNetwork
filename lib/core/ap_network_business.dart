@@ -52,8 +52,8 @@ class APNetworkBusiness {
   }) :
     assert(identifier != null && identifier.length > 0, 'identifer can not be empty'),
     assert(baseURL != null && baseURL.length > 0, 'baseURL can not be empty'),
-    assert(interceptor != null, 'interceptor can not be null'),
-    assert(parser != null, 'parser can not be null'),
+    //assert(interceptor != null, 'interceptor can not be null'),
+    //assert(parser != null, 'parser can not be null'),
     assert(connectTimeoutMS != null && connectTimeoutMS > 0, 'connectTimeoutMS must > 0'),
     assert(sendTimeoutMS != null && sendTimeoutMS > 0, 'sendTimeoutMS must > 0'),
     assert(recvTimeoutMS != null && recvTimeoutMS > 0, 'recvTimeoutMS must > 0'),

@@ -541,10 +541,10 @@ class APHttpRequest<T extends APHttpModel> {
   @override
   String toString() {
     return '''
-    APHttpRequest $businessIdentifier ${dioOptions?.method} $path
+    APHttpRequest $businessIdentifier ${dioOptions.method} $path
     |Hash: $hashCode
-    |RetryType: ${retry?.type} RetryCount: ${retry?.count} MaxRetry: ${retry?.max}
-    |Headers: ${dioOptions?.headers}
+    |RetryType: ${retry.type} RetryCount: ${retry.count} MaxRetry: ${retry.max}
+    |Headers: ${dioOptions.headers}
     |QueryParams: $queryParams
     |Data: $data
     ''';
@@ -552,16 +552,16 @@ class APHttpRequest<T extends APHttpModel> {
   
   String toLogDBString () {
     return '''
-    ${dioOptions?.method} $path
-    |RetryType: ${retry?.type} RetryCount: ${retry?.count} MaxRetry: ${retry?.max}
-    |Headers: ${dioOptions?.headers}
+    ${dioOptions.method} $path
+    |RetryType: ${retry.type} RetryCount: ${retry.count} MaxRetry: ${retry.max}
+    |Headers: ${dioOptions.headers}
     |QueryParams: $queryParams
     |Data: $data
     ''';
   }
   
   String toBuglyString() {
-    return '${dioOptions?.method} $path';
+    return '${dioOptions.method} $path';
   }
 }
 

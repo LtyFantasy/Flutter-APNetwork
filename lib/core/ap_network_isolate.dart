@@ -65,7 +65,7 @@ class APNetworkIsolate {
   /// 发送事件消息
   APNetworkIsolateMesssage? sendMessage(APNetworkIsolateMesssage messsage) {
     
-    if (messsage == null || messsage is! APNetworkIsolateMesssage) {
+    if (messsage is! APNetworkIsolateMesssage) {
       return null;
     }
 

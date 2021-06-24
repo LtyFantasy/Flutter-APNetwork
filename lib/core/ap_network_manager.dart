@@ -61,7 +61,7 @@ class APNetworkManager {
     return _getInstance()!;
   }
 
-  static APNetworkManager? get instance => _getInstance();
+  static APNetworkManager get instance => _getInstance()!;
   static APNetworkManager? _instance;
 
   static APNetworkManager? _getInstance() {
@@ -71,6 +71,7 @@ class APNetworkManager {
     return _instance;
   }
 
+  // 慎重使用，该方法主要用于测试
   static void release() {
     _instance = null;
   }
@@ -98,7 +99,7 @@ class APNetworkManager {
       await _cache!.initSetup();
       await _promise!.initSetup();
     }
-    catch (e, s) {
+    catch (e) {
       debugPrint('[APNetwork] setup failed, $e');
     }
     _initOk.complete();
@@ -106,7 +107,7 @@ class APNetworkManager {
 
   /// 添加业务线
   Future<void> addBusiness(APNetworkBusiness business) async {
-    if (business == null) return;
+    
     if (_businessMap[business.identifier] != null) return;
     
     // 先添加业务线
@@ -234,7 +235,6 @@ class APNetworkManager {
   /// 发起HTTP请求
   Future<void> _sendRequest(APHttpRequest request) async {
     
-    if (request == null) return;
     APNetworkBusiness? business = _businessMap[request.businessIdentifier];
     _APNetworkBusinessInfo? businessInfo =
         _businessInfoMap[request.businessIdentifier];
@@ -249,8 +249,8 @@ class APNetworkManager {
       )));
       
       if (_initErrorCallback != null) {
-        String error = 'Request ${request?.apiPath}, Business ${request?.businessIdentifier} not found,';
-        error += 'current business ${_businessMap?.keys}, info ${_businessInfoMap?.keys}';
+        String error = 'Request ${request.apiPath}, Business ${request.businessIdentifier} not found,';
+        error += 'current business ${_businessMap.keys}, info ${_businessInfoMap.keys}';
         _initErrorCallback!(error);
       }
       
