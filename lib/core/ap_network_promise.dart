@@ -22,7 +22,7 @@ class APNetworkPromise {
     return _getInstance(mockDB: mockDB)!;
   }
   
-  static APNetworkPromise? get instance => _getInstance();
+  static APNetworkPromise get instance => _getInstance()!;
   static APNetworkPromise? _instance;
   
   static APNetworkPromise? _getInstance({APNetworkPromiseDB? mockDB}) {

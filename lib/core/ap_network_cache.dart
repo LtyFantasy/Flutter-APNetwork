@@ -21,7 +21,7 @@ class APNetworkCache {
     return _getInstance(lruCacheSize: lruCacheSize, mockDB: mockDB)!;
   }
   
-  static APNetworkCache? get instance => _getInstance(lruCacheSize: 100);
+  static APNetworkCache get instance => _getInstance(lruCacheSize: 100)!;
   static APNetworkCache? _instance;
   
   static APNetworkCache? _getInstance({int? lruCacheSize, APNetworkCacheDB? mockDB}) {
