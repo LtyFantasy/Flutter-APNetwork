@@ -40,10 +40,10 @@ class APNetworkManager {
   late Map<String?, _APNetworkBusinessInfo> _businessInfoMap;
 
   /// 请求缓存
-  APNetworkCache? _cache;
+  APNetworkCache _cache;
 
   /// Promise，请求保证机制
-  APNetworkPromise? _promise;
+  APNetworkPromise _promise;
 
   /// 单例模式
   ///
@@ -83,11 +83,12 @@ class APNetworkManager {
   /// ----------------- 设置 --------------------
 
   /// 单例初始化设置
-  APNetworkManager._init() {
+  APNetworkManager._init() :
+    _cache = APNetworkCache.instance,
+    _promise = APNetworkPromise.instance {
+    
     _businessMap = Map();
     _businessInfoMap = Map();
-    _cache = APNetworkCache.instance;
-    _promise = APNetworkPromise.instance;
     _initOk = Completer();
     _setupData();
   }
@@ -96,8 +97,8 @@ class APNetworkManager {
   Future<void> _setupData() async {
     // 加载Cache本地缓存
     try {
-      await _cache!.initSetup();
-      await _promise!.initSetup();
+      await _cache.initSetup();
+      await _promise.initSetup();
     }
     catch (e) {
       debugPrint('[APNetwork] setup failed, $e');
@@ -160,8 +161,8 @@ class APNetworkManager {
 
   /// 清空各缓存数据
   Future<void> cleanData() async {
-    await _cache!.cleanCache();
-    await _promise!.cleanAll();
+    await _cache.cleanCache();
+    await _promise.cleanAll();
     for (APNetworkBusiness business in _businessMap.values) {
       await business.interceptor.onCleanData();
     }
@@ -381,16 +382,17 @@ class APNetworkManager {
     // 开启了缓存功能，且本次request不忽略缓存
     if (request.cache.enable == true && request.cache.ignoreOnce == false) {
       request.generateMD5Key();
-      Map<String, dynamic>? cacheData = _cache!.loadCache(request.cache.md5Key);
+      Map<String, dynamic>? cacheData = _cache.loadCache(request.cache.md5Key);
       // 成功读取到缓存，则给request设置cacheResponse
       // 这样业务层发起请求后，立刻就可以判断是否有缓存可以使用
       if (cacheData != null) {
         business.interceptor.onLoadCache(request, cacheData);
-        request.cache.response = APHttpResponse(
+        request.cache.setResponse(APHttpResponse(
             data: cacheData,
             model: request.converter == null
                 ? null
-                : request.converter!(cacheData));
+                : request.converter!(cacheData)
+        ));
       }
     }
   }
@@ -404,7 +406,7 @@ class APNetworkManager {
         response.error == null &&
         response.data != null) {
       business.interceptor.onSaveCache(request, response.data);
-      await _cache!.saveCache(request.cache.md5Key, response.data,
+      await _cache.saveCache(request.cache.md5Key, response.data,
           duration: request.cache.duration);
     }
   }
@@ -423,7 +425,7 @@ class APNetworkManager {
     if (_initOk.isCompleted == false) {
       await _initOk.future;
     }
-    return _promise!.loadBusinessRequests(businessIdentifier, paths: paths);
+    return _promise.loadBusinessRequests(businessIdentifier, paths: paths);
   }
 
   /// 检查是否需要加入Promise
@@ -433,7 +435,7 @@ class APNetworkManager {
     if (request.promise.key != null) return;
 
     request.generatePromiseKey();
-    _promise!.saveRequest(request);
+    _promise.saveRequest(request);
     // 拦截器监听
     business.interceptor.onAddToPromise(request);
   }
@@ -444,7 +446,7 @@ class APNetworkManager {
     // 正常来说，请求如果返回Success，那么就是完成了Proimse
     // 目前还没有例外的情况，如果有，Promise就需要挪动到业务层去做，而不是在网络框架做
     if (request.promise.enable == true && response.error == null) {
-      await _promise!.deleteRequestWithKey(
+      await _promise.deleteRequestWithKey(
           request.businessIdentifier, request.promise.key);
       business.interceptor.onRemoveFromPromise(request);
     }

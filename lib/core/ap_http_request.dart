@@ -31,7 +31,7 @@ class APHttpRequest<T extends APHttpModel> {
   final String? businessIdentifier;
   
   /// 接口请求路径，不包含基地址，eg: /user
-  final String? apiPath;
+  final String apiPath;
   
   /// 请求路径参数，如 /:userId/like
   final String? pathParam;
@@ -103,7 +103,7 @@ class APHttpRequest<T extends APHttpModel> {
   APHttpRequest({
     this.businessIdentifier,
     String? method,
-    this.apiPath,
+    required this.apiPath,
     this.pathParam,
     String? contentType,
     ResponseType? responseType,
@@ -133,8 +133,7 @@ class APHttpRequest<T extends APHttpModel> {
   }) :
     assert(businessIdentifier != null && businessIdentifier.length > 0, '[APHttpRequest] businessIdentifier is empty'),
     assert(method != null && method.length > 0, '[APHttpRequest] method is empty'),
-    assert(apiPath != null && apiPath.length > 0, '[APHttpRequest] apiPath is empty'),
-    _path = pathParam == null ? apiPath : apiPath! + pathParam,
+    _path = pathParam == null ? apiPath : apiPath + pathParam,
     cancelToken = cancelToken ?? CancelToken(),
     dioOptions = Options(
       method: method,
@@ -161,7 +160,7 @@ class APHttpRequest<T extends APHttpModel> {
     mock = APHttpRequestMock(
       enable: mockEnable ?? false,
       projectId: mockProjectId ?? 0,
-      originPath: pathParam == null ? apiPath : apiPath! + pathParam,
+      originPath: pathParam == null ? apiPath : apiPath + pathParam,
     ) {
     
     if (data is Map) {
@@ -178,7 +177,7 @@ class APHttpRequest<T extends APHttpModel> {
   /// GET请求
   APHttpRequest.get({
     String? businessIdentifier,
-    String? apiPath,
+    required String apiPath,
     String? pathParam,
     String? contentType,
     ResponseType? responseType,
@@ -227,7 +226,7 @@ class APHttpRequest<T extends APHttpModel> {
 
   APHttpRequest.delete({
     String? businessIdentifier,
-    String? apiPath,
+    required String apiPath,
     String? pathParam,
     String? contentType,
     ResponseType? responseType,
@@ -280,7 +279,7 @@ class APHttpRequest<T extends APHttpModel> {
 
   APHttpRequest.post({
     String? businessIdentifier,
-    String? apiPath,
+    required String apiPath,
     String? pathParam,
     String? contentType,
     ResponseType? responseType,
@@ -356,7 +355,7 @@ class APHttpRequest<T extends APHttpModel> {
     String value = '';
     if (businessIdentifier != null) value += businessIdentifier!;
     if (dioOptions.method != null) value += dioOptions.method!;
-    if (apiPath != null) value += apiPath!;
+    value += apiPath;
     if (pathParam != null) value += pathParam!;
     if (queryParams != null) {
       value += json.encode(queryParams);
@@ -502,7 +501,7 @@ class APHttpRequest<T extends APHttpModel> {
       APHttpRequest request = APHttpRequest(
           businessIdentifier: businessIdentifier,
           method: method,
-          apiPath: apiPath,
+          apiPath: apiPath ?? '',
           pathParam: pathParam,
           contentType: contentType,
           responseType: responseType,
@@ -610,7 +609,7 @@ class APHttpRequestRetry {
 }
 
 /// 缓存能力
-class APHttpRequestCache<T extends APHttpModel?> {
+class APHttpRequestCache<T extends APHttpModel> {
   
   /// 缓存MD5码，作为Key使用
   String? _md5Key;
@@ -641,9 +640,9 @@ class APHttpRequestCache<T extends APHttpModel?> {
   final Duration? duration;
   
   /// 缓存数据，可能为null
-  late APHttpResponse<T> _response;
-  APHttpResponse<T> get response => _response;
-  set response (APHttpResponse response) {
+  APHttpResponse<T>? _response;
+  APHttpResponse<T>? get response => _response;
+  void setResponse (APHttpResponse response) {
   
     APHttpResponse<T> tResponse = APHttpResponse<T>(
         headers: response.headers,

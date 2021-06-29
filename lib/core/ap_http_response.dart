@@ -2,7 +2,7 @@
 import 'ap_http_error.dart';
 import 'ap_http_model.dart';
 
-class APHttpResponse<T extends APHttpModel?> {
+class APHttpResponse<T extends APHttpModel> {
   
   /// 服务端返回的Header数据
   final Map<String, List<String>>? headers;
